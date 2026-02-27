@@ -1,0 +1,650 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>H.E.A.L| Regional Dashboard</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <link rel="stylesheet" href="style.css">
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+
+<body>
+
+    <header>
+        <div style="display: flex; align-items: center; gap: 0.5rem;" onclick="window.location.href='index.html'"
+            style="cursor: pointer;">
+            <i data-lucide="activity" style="color: var(--primary);"></i>
+            <h1>H.E.A.L</h1>
+        </div>
+        <div style="display: flex; gap: 1rem; align-items: center;">
+            <select id="languageSelect" onchange="changeLanguage()">
+                <option value="en">English</option>
+                <option value="hi">Hindi</option>
+                <option value="as">Assamese (অসমীয়া)</option>
+                <option value="mz">Mizo (Mizo ṭawng)</option>
+                <option value="mn">Meiteilon (Manipuri)</option>
+                <option value="ks">Khasi (Khasi)</option>
+            </select>
+            <button class="btn btn-secondary" onclick="window.location.href='index.html'"
+                style="padding: 0.5rem 1rem; font-size: 0.875rem;">
+                <i data-lucide="plus" size="16"></i> New Report
+            </button>
+            <div class="menu-container">
+                <button class="menu-trigger" onclick="toggleMenu(event)">
+                    <i data-lucide="more-vertical" size="20"></i>
+                </button>
+                <div id="dashboardMenu" class="dropdown-menu">
+                    <button class="dropdown-item" onclick="handleVizClick()">
+                        <i data-lucide="layout-grid" size="16"></i>
+                        <span id="vizMenuText">Visualize Data</span>
+                    </button>
+                    <button class="dropdown-item" onclick="window.location.href='education.html'">
+                        <i data-lucide="graduation-cap" size="16"></i>
+                        <span>Educational Modules</span>
+                    </button>
+                    <button class="dropdown-item danger" onclick="logout()">
+                        <i data-lucide="log-out" size="16"></i>
+                        Logout
+                    </button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main class="container">
+        <!-- Dashboard Summary (Existing) -->
+        <div id="mainDashboard">
+            <div style="margin-bottom: 2rem;">
+                <h1 class="dash-title">District Health Analytics</h1>
+                <p style="color: var(--text-muted); margin-top: -1.5rem;">Real-time monitoring of community health
+                    indicators and water quality.</p>
+            </div>
+
+            <!-- Alerts Section -->
+            <div id="alerts"></div>
+
+            <!-- Summary Statistics -->
+            <div class="summary-grid">
+                <div class="stat-card">
+                    <div class="stat-label">Total Villages</div>
+                    <div class="stat-value" id="totalVillages">0</div>
+                </div>
+                <div class="stat-card alert">
+                    <div class="stat-label">Active Outbreaks</div>
+                    <div class="stat-value" id="activeOutbreaks">0</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Avg. Turbidity</div>
+                    <div class="stat-value" id="avgTurbidity">0</div>
+                </div>
+            </div>
+
+            <!-- Data Table -->
+            <div class="card" style="padding: 0; overflow: hidden; margin-bottom: 3rem;">
+                <div
+                    style="padding: 1.5rem; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; background: #fff;">
+                    <h3 style="margin: 0; font-weight: 600;">Village Health Status</h3>
+                    <div style="font-size: 0.75rem; color: var(--text-muted);">Showing all monitored areas</div>
+                </div>
+                <div class="data-table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Village</th>
+                                <th>Sample Date</th>
+                                <th>Diarrhea Cases</th>
+                                <th>Turbidity (NTU)</th>
+                                <th>Bacteria</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody id="statsTableBody">
+                            <!-- Rows injected by JS -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Live Community Reports -->
+            <div style="margin-top: 3rem; margin-bottom: 2rem;">
+                <h2 style="font-size: 1.5rem; font-weight: 700;">Live Community Submissions</h2>
+                <p style="color: var(--text-muted);">Real-time reports from the field.</p>
+            </div>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1.5rem; margin-bottom: 2rem;">
+                <!-- Villager Logs -->
+                <div class="card" style="padding: 1rem;">
+                    <h4
+                        style="margin-bottom: 1rem; color: var(--primary); display: flex; align-items: center; gap: 0.5rem;">
+                        <i data-lucide="user" size="18"></i> Villager Reports
+                    </h4>
+                    <div id="villagerLogs" style="font-size: 0.875rem; max-height: 200px; overflow-y: auto;">
+                        <p style="color: var(--text-muted);">No reports yet.</p>
+                    </div>
+                </div>
+
+                <!-- ASHA Logs -->
+                <div class="card" style="padding: 1rem;">
+                    <h4
+                        style="margin-bottom: 1rem; color: var(--success); display: flex; align-items: center; gap: 0.5rem;">
+                        <i data-lucide="heart-pulse" size="18"></i> ASHA Field Logs
+                    </h4>
+                    <div id="ashaLogs" style="font-size: 0.875rem; max-height: 200px; overflow-y: auto;">
+                        <p style="color: var(--text-muted);">No logs yet.</p>
+                    </div>
+                </div>
+
+                <!-- Staff Logs -->
+                <div class="card" style="padding: 1rem;">
+                    <h4
+                        style="margin-bottom: 1rem; color: var(--warning); display: flex; align-items: center; gap: 0.5rem;">
+                        <i data-lucide="shield-check" size="18"></i> Gov Staff Tests
+                    </h4>
+                    <div id="staffLogs" style="font-size: 0.875rem; max-height: 200px; overflow-y: auto;">
+                        <p style="color: var(--text-muted);">No results yet.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Advanced Visualization Section (Professional Dark Dashboard) -->
+        <div id="vizSection" class="viz-section" style="display: none;">
+            <div class="viz-kpi-row">
+                <div class="viz-kpi-card">
+                    <div class="viz-kpi-label">TOTAL CASES</div>
+                    <div class="viz-kpi-value text-danger" id="kpi-total">0</div>
+                </div>
+                <div class="viz-kpi-card">
+                    <div class="viz-kpi-label">HIGH RISK AREAS</div>
+                    <div class="viz-kpi-value text-warning" id="kpi-risk">0</div>
+                </div>
+                <div class="viz-kpi-card">
+                    <div class="viz-kpi-label">WATER SAFETY STATUS</div>
+                    <div class="viz-kpi-value text-success" id="kpi-stable">0.0</div>
+                </div>
+            </div>
+
+            <div class="viz-main-layout">
+                <!-- Left Sidebar: Top Villages -->
+                <div class="viz-sidebar">
+                    <h4
+                        style="font-size: 0.7rem; color: #94a3b8; margin-bottom: 0.75rem; border-bottom: 1px solid #334155; padding-bottom: 0.5rem; text-transform: uppercase;">
+                        Top Impacted</h4>
+                    <div id="viz-top-list"></div>
+                </div>
+
+                <!-- Center: Situation Map -->
+                <div>
+                    <div style="display: flex; gap: 0.5rem; margin-bottom: 0.75rem;">
+                        <button class="btn-viz-filter active" onclick="filterViz('all')" id="filter-all">All
+                            Levels</button>
+                        <button class="btn-viz-filter" onclick="filterViz('high')" id="filter-high"
+                            style="border-bottom-color: #ef4444;">High Risk</button>
+                        <button class="btn-viz-filter" onclick="filterViz('moderate')" id="filter-moderate"
+                            style="border-bottom-color: #f59e0b;">Moderate</button>
+                        <button class="btn-viz-filter" onclick="filterViz('safe')" id="filter-safe"
+                            style="border-bottom-color: #22c55e;">Safe</button>
+                    </div>
+                    <div class="viz-map-container" id="viz-map-hero">
+                        <div style="position: absolute; top: 1rem; left: 1rem; z-index: 5;">
+                            <div style="font-size: 0.8rem; font-weight: 700; color: #fff;">LIVE SITUATION MAP</div>
+                            <div style="font-size: 0.6rem; color: #94a3b8;">NORTH EAST DISTRICT HUD</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Right Sidebar: Predictive Intel -->
+                <div class="viz-sidebar">
+                    <h4
+                        style="font-size: 0.7rem; color: #60a5fa; margin-bottom: 0.75rem; border-bottom: 1px solid #1e3a8a; padding-bottom: 0.5rem; text-transform: uppercase; display: flex; align-items: center; gap: 0.4rem;">
+                        <i data-lucide="brain-circuit" size="14"></i> Predictive Intel
+                    </h4>
+                    <div id="viz-prediction-list"></div>
+
+                    <h4
+                        style="font-size: 0.7rem; color: #94a3b8; margin-top: 1.5rem; margin-bottom: 0.75rem; border-bottom: 1px solid #334155; padding-bottom: 0.5rem; text-transform: uppercase;">
+                        Resource Queue</h4>
+                    <div id="viz-resource-list"></div>
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+    <script src="script.js"></script>
+    <script>
+        // Check if user is authenticated as Staff
+        const authRole = sessionStorage.getItem("authRole");
+        if (authRole !== 'staff') {
+            // Force user to login on main page
+            window.location.href = 'index.html?login=staff';
+        }
+
+        let masterData = []; // Store all combined data for viz
+
+        async function loadDashboard() {
+            try {
+                let tableHTML = "";
+                let alertsHTML = "";
+                let outbreakCount = 0;
+                let totalTurbidity = 0;
+                let totalEntries = 0;
+                masterData = []; // Reset
+
+                // 1. Load CSV Data
+                const response = await fetch("combined_outbreak_data.csv");
+                if (response.ok) {
+                    const text = await response.text();
+                    const rows = text.trim().split("\n").slice(1).filter(r => r.trim() !== "");
+
+                    rows.forEach(row => {
+                        const cols = row.split(",");
+                        if (cols.length < 6) return;
+                        const entry = {
+                            village: cols[0],
+                            date: cols[1],
+                            diarrhea: Number(cols[2]),
+                            turbidity: Number(cols[3]),
+                            bacteria: cols[4],
+                            outbreak: cols[5] === 'Yes' || cols[5] === '1'
+                        };
+                        masterData.push(entry);
+                        totalEntries++;
+                        totalTurbidity += entry.turbidity;
+
+                        let statusBadge = "";
+                        if (entry.outbreak) {
+                            statusBadge = '<span class="badge badge-danger">Outbreak</span>';
+                            outbreakCount++;
+                            alertsHTML += `
+                                <div class="alert-item">
+                                    <i data-lucide="alert-triangle" size="18"></i>
+                                    Active Health Outbreak detected in ${entry.village}. Emergency response required.
+                                </div>
+                            `;
+                        } else if (entry.diarrhea > 15 || entry.turbidity > 5) {
+                            statusBadge = '<span class="badge badge-warning">High Risk</span>';
+                        } else {
+                            statusBadge = '<span class="badge badge-success">Stable</span>';
+                        }
+
+                        tableHTML += `
+                            <tr>
+                                <td><strong>${entry.village}</strong></td>
+                                <td>${entry.date}</td>
+                                <td>${entry.diarrhea}</td>
+                                <td>${entry.turbidity.toFixed(1)}</td>
+                                <td>${entry.bacteria}</td>
+                                <td>${statusBadge}</td>
+                            </tr>
+                        `;
+                    });
+                }
+
+                // 2. Load Local Storage Data
+                const villagers = JSON.parse(localStorage.getItem("healthData_villager")) || [];
+                const asha = JSON.parse(localStorage.getItem("healthData_asha")) || [];
+                const staff = JSON.parse(localStorage.getItem("healthData_staff")) || [];
+
+                const allLive = [...villagers, ...asha, ...staff];
+
+                allLive.forEach(report => {
+                    const entry = {
+                        village: report.village,
+                        date: report.reportDate || new Date(report.timestamp).toLocaleDateString(),
+                        diarrhea: report.diarrhea || 0,
+                        turbidity: report.turbidity || 0,
+                        bacteria: report.bacteria || "N/A",
+                        isLive: true
+                    };
+                    masterData.push(entry);
+                    totalEntries++;
+                    totalTurbidity += entry.turbidity;
+
+                    let statusBadge = "";
+                    if (entry.diarrhea > 15 || entry.turbidity > 10) {
+                        statusBadge = '<span class="badge badge-danger">Alert</span>';
+                    } else if (entry.diarrhea > 5 || entry.turbidity > 5) {
+                        statusBadge = '<span class="badge badge-warning">Caution</span>';
+                    } else {
+                        statusBadge = '<span class="badge badge-success">Normal</span>';
+                    }
+
+                    tableHTML += `
+                        <tr style="background: rgba(37, 99, 235, 0.02);">
+                            <td><div style="display:flex; align-items:center; gap:0.5rem;">
+                                <i data-lucide="radio" size="12" style="color:var(--primary);"></i>
+                                <strong>${entry.village}</strong>
+                            </div></td>
+                            <td>${entry.date}</td>
+                            <td>${entry.diarrhea}</td>
+                            <td>${entry.turbidity.toFixed(1)}</td>
+                            <td>${entry.bacteria}</td>
+                            <td>${statusBadge}</td>
+                        </tr>
+                    `;
+                });
+
+                document.getElementById("statsTableBody").innerHTML = tableHTML;
+                document.getElementById("alerts").innerHTML = alertsHTML;
+                document.getElementById("totalVillages").innerText = totalEntries;
+                document.getElementById("activeOutbreaks").innerText = outbreakCount;
+                document.getElementById("avgTurbidity").innerText = totalEntries > 0 ? (totalTurbidity / totalEntries).toFixed(2) : "0";
+
+                loadLocalLogs();
+                generateVisualizations();
+
+                if (window.lucide) lucide.createIcons();
+
+            } catch (error) {
+                console.error(error);
+            }
+        }
+
+        function toggleMenu(event) {
+            event.stopPropagation();
+            document.getElementById("dashboardMenu").classList.toggle("show");
+        }
+
+        function handleVizClick() {
+            toggleViz();
+            document.getElementById("dashboardMenu").classList.remove("show");
+
+            const isViz = document.getElementById("vizSection").style.display === "block";
+            document.getElementById("vizMenuText").innerText = isViz ? "Show Dashboard" : "Visualize Data";
+        }
+
+        // Close menu on click outside
+        window.addEventListener('click', () => {
+            document.getElementById("dashboardMenu").classList.remove("show");
+        });
+
+        const COORDINATE_MAP = {
+            // Mizoram
+            'Durtlang': [23.7719, 92.7303],
+            'Selesih': [23.7850, 92.7500],
+            'Falkawn': [23.6420, 92.7230],
+            'Lengpui': [23.8394, 92.6186],
+            'Kolasib': [24.2250, 92.6730],
+            'Aizawl': [23.7271, 92.7176],
+
+            // Manipur
+            'Thoubal': [24.6400, 94.0200],
+            'Lilong': [24.7167, 93.9333],
+            'Bishnupur': [24.6333, 93.7667],
+            'Moirang': [24.5000, 93.7667],
+            'Imphal': [24.8170, 93.9368],
+
+            // Meghalaya
+            'Mawphlang': [25.4500, 91.7500],
+            'Cherrapunji': [25.2667, 91.7333],
+            'Laitlyngkot': [25.4500, 91.8333],
+            'Jowai': [25.4500, 92.2000],
+            'Shillong': [25.5788, 91.8933],
+
+            // Assam
+            'Dispur': [26.1511, 91.7915],
+            'Jalukbari': [26.1400, 91.6600],
+            'Noonmati': [26.1800, 91.8000],
+            'Tezpur': [26.6333, 92.8000],
+            'Guwahati': [26.1158, 91.7086],
+
+            // Nagaland
+            'Chumukedima': [25.8167, 93.7333],
+            'Medziphema': [25.7500, 93.8500],
+            'Niuland': [25.9667, 93.8833],
+            'Kohima': [25.6667, 94.1167],
+            'Dimapur': [25.8640, 93.7554],
+
+            // Tripura
+            'Badharghat': [23.8100, 91.2700],
+            'Jogendranagar': [23.8200, 91.3000],
+            'Pratapgarh': [23.8100, 91.2900],
+            'Udaipur': [23.5333, 91.4833],
+            'Agartala': [23.8315, 91.2868],
+
+            // Arunachal
+            'Naharlagun': [27.1000, 93.7000],
+            'Nirjuli': [27.1167, 93.7667],
+            'Doimukh': [27.1333, 93.7500],
+            'Itanagar': [27.0844, 93.6053]
+        };
+
+        let map = null;
+        let mapMarkers = [];
+
+        function initMap() {
+            if (map) return;
+            map = L.map('viz-map-hero', {
+                zoomControl: false,
+                attributionControl: false
+            }).setView([25.0, 92.5], 6);
+
+            L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+                maxZoom: 19
+            }).addTo(map);
+
+            L.control.zoom({ position: 'bottomright' }).addTo(map);
+        }
+
+        let currentRiskFilter = 'all';
+
+        function filterViz(risk) {
+            currentRiskFilter = risk;
+            document.querySelectorAll('.btn-viz-filter').forEach(btn => btn.classList.remove('active'));
+            document.getElementById(`filter-${risk}`).classList.add('active');
+            generateVisualizations();
+        }
+
+        function toggleViz() {
+            const main = document.getElementById("mainDashboard");
+            const viz = document.getElementById("vizSection");
+
+            if (viz.style.display === "none") {
+                main.style.display = "none";
+                viz.style.display = "block";
+                setTimeout(() => {
+                    initMap();
+                    map.invalidateSize();
+                    generateVisualizations();
+                }, 100);
+            } else {
+                main.style.display = "block";
+                viz.style.display = "none";
+            }
+            lucide.createIcons();
+        }
+
+        function generateVisualizations() {
+            if (!map) return;
+
+            let totalCases = 0;
+            let riskCount = 0;
+            let totalTurb = 0;
+            const villageStats = {};
+
+            masterData.forEach(d => {
+                totalCases += d.diarrhea;
+                totalTurb += d.turbidity;
+                if (!villageStats[d.village]) {
+                    villageStats[d.village] = { diag: 0, turb: 0, entries: 0 };
+                }
+                villageStats[d.village].diag += d.diarrhea;
+                villageStats[d.village].turb = Math.max(villageStats[d.village].turb, d.turbidity);
+                villageStats[d.village].entries++;
+            });
+
+            const villageList = Object.keys(villageStats).map(name => {
+                const diag = villageStats[name].diag;
+                const turb = villageStats[name].turb;
+                const riskVal = (diag * 1.5) + (turb * 2);
+
+                // AI Intel Prediction Logic
+                // We simulate a propensity score based on clinical (diag) + environmental (turb) factors
+                let intelPotential = (turb > 8 ? 40 : turb * 2) + (diag > 15 ? 50 : diag * 2);
+                let forecast = "Stable";
+                if (intelPotential > 70) forecast = "CRITICAL (72h)";
+                else if (intelPotential > 40) forecast = "High Risk";
+                else if (intelPotential > 20) forecast = "Watching";
+
+                let riskCategory = 'safe';
+                if (riskVal > 20) riskCategory = 'high';
+                else if (riskVal > 10) riskCategory = 'moderate';
+
+                return {
+                    name,
+                    diag,
+                    turb,
+                    risk: riskVal,
+                    category: riskCategory,
+                    intel: {
+                        score: intelPotential,
+                        forecast: forecast
+                    }
+                };
+            }).sort((a, b) => b.diag - a.diag);
+
+            riskCount = villageList.filter(v => v.category === 'high').length;
+
+            // Update KPIs
+            document.getElementById("kpi-total").innerText = totalCases.toLocaleString();
+            document.getElementById("kpi-risk").innerText = riskCount;
+            document.getElementById("kpi-stable").innerText = (masterData.length > 0 ? (totalTurb / masterData.length).toFixed(1) : "0.0");
+
+            // Sidebar: Top Impacted
+            document.getElementById("viz-top-list").innerHTML = villageList.slice(0, 10).map(v => `
+                <div class="viz-list-item">
+                    <span style="color: #e2e8f0; font-weight: 500;">${v.name}</span>
+                    <span class="text-danger" style="font-weight: 700;">${v.diag}</span>
+                </div>
+            `).join("");
+
+            // Sidebar: Predictive Intel
+            const predictionHtml = villageList
+                .filter(v => v.intel.score > 30)
+                .slice(0, 3)
+                .map(v => `
+                    <div class="prediction-card">
+                        <div class="prediction-badge" style="background: ${v.intel.score > 60 ? '#ef4444' : '#f59e0b'}; color: white;">
+                            ${v.intel.forecast}
+                        </div>
+                        <div style="font-size: 0.8rem; font-weight: 700; color: #fff; margin-bottom: 0.25rem;">${v.name}</div>
+                        <div style="font-size: 0.65rem; color: #94a3b8; line-height: 1.3;">
+                            Detected environmental spike (Turbidity: ${v.turb}) correlating with rising clinical reports. Immediate monitoring advised.
+                        </div>
+                        <div style="margin-top: 0.5rem; height: 3px; background: #334155; border-radius: 2px;">
+                            <div style="height: 100%; width: ${Math.min(100, v.intel.score)}%; background: #60a5fa; border-radius: 2px;"></div>
+                        </div>
+                    </div>
+                `).join("");
+            document.getElementById("viz-prediction-list").innerHTML = predictionHtml || '<div style="font-size: 0.75rem; color: #64748b; padding: 1rem; text-align: center;">No immediate threats detected.</div>';
+
+            // Sidebar: Resources
+            document.getElementById("viz-resource-list").innerHTML = villageList.filter(v => v.risk > 15).slice(0, 8).map(v => `
+                <div class="viz-list-item" style="flex-direction: column; gap: 0.25rem; align-items: flex-start;">
+                    <div style="display:flex; justify-content:space-between; width:100%;">
+                        <span style="color: #60a5fa; font-weight: 600;">${v.name}</span>
+                        <span style="font-size: 0.6rem; background: #1e3a8a; padding: 1px 4px; border-radius: 4px;">Urg: ${Math.round(v.risk)}</span>
+                    </div>
+                    <div style="font-size: 0.6rem; color: #94a3b8;">${v.diag > 20 ? 'Medical Dispatch' : 'Water Purification'}</div>
+                </div>
+            `).join("");
+
+            // Map Markers
+            mapMarkers.forEach(m => map.removeLayer(m));
+            mapMarkers = [];
+
+            villageList.forEach(v => {
+                if (currentRiskFilter !== 'all' && v.category !== currentRiskFilter) return;
+
+                let coords = [25.0, 92.5];
+                for (const city in COORDINATE_MAP) {
+                    if (v.name.startsWith(city)) {
+                        const base = COORDINATE_MAP[city];
+                        const jitterX = (v.name.length % 10 - 5) * 0.02;
+                        const jitterY = (v.name.length % 7 - 3) * 0.02;
+                        coords = [base[0] + jitterX, base[1] + jitterY];
+                        break;
+                    }
+                }
+
+                let color = "#ef4444"; // Red for High
+                if (v.category === 'moderate') color = "#fbbf24"; // Amber for Moderate
+                else if (v.category === 'safe') color = "#22c55e"; // Green for Safe
+
+                // Smaller, more refined dots like the reference image
+                const radius = Math.min(8, 3 + (v.diag * 0.15));
+
+                // Add pulse if critical AI prediction
+                const markerOptions = {
+                    radius: radius,
+                    fillColor: color,
+                    color: "#fff",
+                    weight: 1,
+                    opacity: 1,
+                    fillOpacity: 0.9,
+                    className: v.intel.score > 70 ? 'pulse-red' : ''
+                };
+
+                const marker = L.circleMarker(coords, markerOptions).addTo(map);
+
+                marker.bindPopup(`
+                    <div style="color: #0f172a; font-family: 'Inter', sans-serif; min-width: 140px;">
+                        <strong style="display:block; margin-bottom: 4px; border-bottom: 1px solid #eee; padding-bottom: 4px;">${v.name}</strong>
+                        <div style="font-size: 0.75rem; margin-top: 4px;">Risk: <span style="color:${color}; font-weight: 700;">${v.category.toUpperCase()}</span></div>
+                        <div style="font-size: 0.75rem;">Forecast: <span style="color: #2563eb; font-weight: 600;">${v.intel.forecast}</span></div>
+                        <div style="font-size: 0.75rem;">Active Cases: <strong>${v.diag}</strong></div>
+                        <div style="font-size: 0.75rem;">Turbidity Index: <strong>${v.turb.toFixed(1)}</strong></div>
+                    </div>
+                `);
+                mapMarkers.push(marker);
+            });
+
+        }
+
+        function loadLocalLogs() {
+            const villagers = JSON.parse(localStorage.getItem("healthData_villager")) || [];
+            const asha = JSON.parse(localStorage.getItem("healthData_asha")) || [];
+            const staff = JSON.parse(localStorage.getItem("healthData_staff")) || [];
+
+            if (villagers.length > 0) {
+                document.getElementById("villagerLogs").innerHTML = villagers.map(report => `
+                    <div style="border-bottom: 1px solid #eee; padding: 0.5rem 0;">
+                        <div style="font-weight: 600;">${report.village}</div>
+                        <div style="font-size: 0.75rem;">Symptom: ${report.symptoms.join(", ")}</div>
+                        <div style="font-size: 0.75rem; color: var(--text-muted);">${new Date(report.timestamp).toLocaleTimeString()}</div>
+                    </div>
+                `).join("");
+            }
+
+            if (asha.length > 0) {
+                document.getElementById("ashaLogs").innerHTML = asha.map(log => `
+                    <div style="border-bottom: 1px solid #eee; padding: 0.5rem 0;">
+                        <div style="font-weight: 600;">${log.village}</div>
+                        <div style="font-size: 0.75rem;">Sick People: ${log.sickCount}</div>
+                        <div style="font-size: 0.75rem; color: var(--text-muted);">${log.reportDate}</div>
+                    </div>
+                `).join("");
+            }
+
+            if (staff.length > 0) {
+                document.getElementById("staffLogs").innerHTML = staff.map(res => `
+                    <div style="border-bottom: 1px solid #eee; padding: 0.5rem 0;">
+                        <div style="font-weight: 600;">${res.village}</div>
+                        <div style="font-size: 0.75rem;">pH: ${res.ph} | Turb: ${res.turbidity}</div>
+                        <div style="font-size: 0.75rem; color: var(--text-muted);">${res.notes || 'No notes'}</div>
+                    </div>
+                `).join("");
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            loadDashboard();
+        });
+    </script>
+</body>
+
+</html>

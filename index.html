@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>H.E.A.L | Community Monitoring</title>
+    <link rel="stylesheet" href="style.css">
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+
+<body>
+
+    <header>
+        <div style="display: flex; align-items: center; gap: 0.5rem;">
+            <i data-lucide="activity" style="color: var(--primary);"></i>
+            <h1>H.E.A.L</h1>
+        </div>
+        <div style="display: flex; gap: 1rem; align-items: center;">
+            <select id="languageSelect" onchange="changeLanguage()">
+                <option value="en">English</option>
+                <option value="hi">Hindi</option>
+                <option value="as">Assamese (অসমীয়া)</option>
+                <option value="mz">Mizo (Mizo ṭawng)</option>
+                <option value="mn">Meiteilon (Manipuri)</option>
+                <option value="ks">Khasi (Khasi)</option>
+            </select>
+            <div class="menu-container">
+                <button class="menu-trigger" onclick="toggleMenu(event)">
+                    <i data-lucide="more-vertical" size="20"></i>
+                </button>
+                <div id="dashboardMenu" class="dropdown-menu">
+                    <button class="dropdown-item" onclick="window.location.href='education.html'">
+                        <i data-lucide="graduation-cap" size="16"></i>
+                        <span>Educational Modules</span>
+                    </button>
+                    <button class="dropdown-item danger" onclick="logout()">
+                        <i data-lucide="log-out" size="16"></i>
+                        Logout
+                    </button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main class="container">
+
+        <div class="card">
+            <div style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 2rem;">
+                <div style="background: rgba(37, 99, 235, 0.1); padding: 0.75rem; border-radius: 12px;">
+                    <i data-lucide="clipboard-list" style="color: var(--primary);"></i>
+                </div>
+                <h2 style="margin: 0;">Community Health Reporting</h2>
+            </div>
+
+
+            <div class="role-selector" style="margin-bottom: 2rem;">
+                <button type="button" class="role-btn active" onclick="setRole('villager')" id="role-villager">
+                    <i data-lucide="user"></i>
+                    <span>Villager</span>
+                </button>
+                <button type="button" class="role-btn" onclick="setRole('asha')" id="role-asha">
+                    <i data-lucide="heart-pulse"></i>
+                    <span>ASHA</span>
+                </button>
+                <button type="button" class="role-btn" onclick="setRole('staff')" id="role-staff">
+                    <i data-lucide="shield-check"></i>
+                    <span>Staff</span>
+                </button>
+            </div>
+
+            <form id="reportForm" onsubmit="event.preventDefault(); submitData();">
+                <input type="hidden" id="userRole" value="villager">
+
+                <div class="form-group">
+                    <label for="village">Village Name / Location</label>
+                    <input type="text" id="village" placeholder="e.g. Greenwood Village" required>
+                </div>
+
+                <!-- Villager Mode Fields -->
+                <div id="fields-villager">
+                    <div class="form-group">
+                        <label>Are many people sick in your area?</label>
+                        <div class="radio-group">
+                            <label class="radio-label"><input type="radio" name="manySick" value="yes"> Yes</label>
+                            <label class="radio-label"><input type="radio" name="manySick" value="no"> No</label>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>What symptoms are common?</label>
+                        <div class="checkbox-grid">
+                            <label class="check-label"><input type="checkbox" name="symptom" value="diarrhea">
+                                Diarrhea</label>
+                            <label class="check-label"><input type="checkbox" name="symptom" value="vomiting">
+                                Vomiting</label>
+                            <label class="check-label"><input type="checkbox" name="symptom" value="fever">
+                                Fever</label>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Is the water looking dirty or muddy?</label>
+                        <div class="radio-group">
+                            <label class="radio-label"><input type="radio" name="waterDirty" value="yes"> Yes</label>
+                            <label class="radio-label"><input type="radio" name="waterDirty" value="no"> No</label>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Is the water smelling bad?</label>
+                        <div class="radio-group">
+                            <label class="radio-label"><input type="radio" name="waterSmell" value="yes"> Yes</label>
+                            <label class="radio-label"><input type="radio" name="waterSmell" value="no"> No</label>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ASHA Worker Mode Fields -->
+                <div id="fields-asha" style="display: none;">
+                    <div class="form-group">
+                        <label for="sickCount">Approximate number of sick people</label>
+                        <input type="number" id="sickCount" placeholder="0" min="0">
+                    </div>
+                    <div class="form-group">
+                        <label>Common Symptoms</label>
+                        <div class="checkbox-grid">
+                            <label class="check-label"><input type="checkbox" name="asha_symptom" value="diarrhea">
+                                Diarrhea</label>
+                            <label class="check-label"><input type="checkbox" name="asha_symptom" value="vomiting">
+                                Vomiting</label>
+                            <label class="check-label"><input type="checkbox" name="asha_symptom" value="fever">
+                                Fever</label>
+                            <label class="check-label"><input type="checkbox" name="asha_symptom" value="skin"> Skin
+                                Rash</label>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="reportDate">Observation Date</label>
+                        <input type="date" id="reportDate">
+                    </div>
+                </div>
+
+                <!-- Government Staff Mode Fields -->
+                <div id="fields-staff" style="display: none;">
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                        <div class="form-group">
+                            <label for="phLevel">pH Level</label>
+                            <input type="number" id="phLevel" placeholder="7.0" step="0.1" min="0" max="14">
+                        </div>
+                        <div class="form-group">
+                            <label for="turbidity">Turbidity (NTU)</label>
+                            <input type="number" id="turbidity" placeholder="0.0" step="0.1" min="0">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="bacteriaCount">Bacterial Contamination (CFU/100ml)</label>
+                        <input type="number" id="bacteriaCount" placeholder="0">
+                    </div>
+                    <div class="form-group">
+                        <label for="labNotes">Lab Test Results / Notes</label>
+                        <input type="text" id="labNotes" placeholder="Enter findings...">
+                    </div>
+                </div>
+
+                <button type="submit" class="btn btn-primary btn-full" id="submitBtn" style="margin-top: 1.5rem;">
+                    <i data-lucide="send" size="18"></i>
+                    Submit Report
+                </button>
+            </form>
+        </div>
+
+        <a href="dashboard.html" class="dashboard-link" id="dashboardLink" style="display: none;">
+            <i data-lucide="bar-chart-3" size="16"></i>
+            Access Health Analytics Dashboard
+        </a>
+
+        <!-- Login Overlay for ASHA/Staff (Full Screen) -->
+        <div id="loginOverlay" class="login-overlay" style="display: none;">
+            <div class="login-card">
+                <div
+                    style="background: rgba(37, 99, 235, 0.1); width: 60px; height: 60px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 1.5rem;">
+                    <i data-lucide="lock" style="color: var(--primary);"></i>
+                </div>
+                <h3 id="loginTitle" style="font-size: 1.25rem; font-weight: 700; margin-bottom: 0.5rem;">Role
+                    Authentication</h3>
+                <p style="color: var(--text-muted); font-size: 0.875rem; margin-bottom: 1.5rem;">Please enter your
+                    access pin to continue.</p>
+                <div class="form-group">
+                    <input type="password" id="accessPin" placeholder="XXXX" maxlength="4"
+                        style="text-align: center; font-size: 1.5rem; letter-spacing: 0.5rem; padding: 1rem;">
+                </div>
+                <div style="display: flex; gap: 1rem; margin-top: 1rem;">
+                    <button type="button" class="btn btn-secondary btn-full" onclick="cancelLogin()">Cancel</button>
+                    <button type="button" class="btn btn-primary btn-full" onclick="verifyLogin()">Login</button>
+                </div>
+            </div>
+        </div>
+
+        <script>
+            // Initialize Lucide icons
+            lucide.createIcons();
+        </script>
+        <script src="script.js"></script>
+</body>
+
+</html>

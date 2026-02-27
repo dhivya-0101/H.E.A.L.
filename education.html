@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>H.E.A.L | Educational Modules</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        .edu-hero {
+            background: linear-gradient(rgba(37, 99, 235, 0.9), rgba(29, 78, 216, 0.9)), url('https://images.unsplash.com/photo-1576091160550-217359f42f8c?auto=format&fit=crop&w=1200') center/cover;
+            color: white;
+            padding: 4rem 2rem;
+            border-radius: 20px;
+            margin-bottom: 2rem;
+            text-align: center;
+        }
+
+        .edu-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+        }
+
+        .edu-card {
+            background: white;
+            border-radius: 16px;
+            overflow: hidden;
+            border: 1px solid var(--border);
+            transition: transform 0.3s ease;
+            cursor: pointer;
+        }
+
+        .edu-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+        }
+
+        .edu-image {
+            height: 180px;
+            background: #f1f5f9;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .edu-content {
+            padding: 1.5rem;
+        }
+
+        .edu-badge {
+            background: rgba(37, 99, 235, 0.1);
+            color: var(--primary);
+            padding: 0.25rem 0.75rem;
+            border-radius: 99px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            display: inline-block;
+        }
+
+        .edu-title {
+            font-size: 1.25rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            color: var(--text-main);
+        }
+
+        .edu-desc {
+            font-size: 0.875rem;
+            color: var(--text-muted);
+            line-height: 1.6;
+        }
+
+        .back-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: white;
+            text-decoration: none;
+            font-weight: 600;
+            margin-bottom: 2rem;
+            opacity: 0.8;
+            transition: opacity 0.2s;
+        }
+
+        .back-btn:hover {
+            opacity: 1;
+        }
+    </style>
+</head>
+
+<body>
+    <header>
+        <div style="display: flex; align-items: center; gap: 0.5rem;" onclick="window.location.href='index.html'"
+            style="cursor: pointer;">
+            <i data-lucide="activity" style="color: var(--primary);"></i>
+            <h1>H.E.A.L</h1>
+        </div>
+        <button class="btn btn-primary" onclick="window.location.href='dashboard.html'"
+            style="padding: 0.5rem 1rem; font-size: 0.875rem;">
+            Back to Dashboard
+        </button>
+    </header>
+
+    <main class="container">
+        <div class="edu-hero">
+            <a href="dashboard.html" class="back-btn">
+                <i data-lucide="arrow-left" size="18"></i>
+                Return to Dashboard
+            </a>
+            <h1 style="font-size: 2.5rem; font-weight: 800; margin-bottom: 1rem;">Educational Portal</h1>
+            <p style="font-size: 1.125rem; opacity: 0.9; max-width: 600px; margin: 0 auto;">
+                Empowering communities through health literacy and preventive care strategies.
+            </p>
+        </div>
+
+        <h2 style="margin-bottom: 2rem; font-size: 1.5rem; font-weight: 700;">Awareness Modules</h2>
+
+        <div class="edu-grid">
+            <!-- Module 1 -->
+            <div class="edu-card">
+                <div class="edu-image" style="background: #eff6ff;">
+                    <i data-lucide="droplets" size="64" style="color: #3b82f6;"></i>
+                </div>
+                <div class="edu-content">
+                    <span class="edu-badge">HYGIENE</span>
+                    <h3 class="edu-title">Safe Water Handling</h3>
+                    <p class="edu-desc">
+                        Learn about storage, filtration, and boiling techniques to ensure your family's water remains
+                        pathogen-free.
+                    </p>
+                </div>
+            </div>
+
+            <!-- Module 2 -->
+            <div class="edu-card">
+                <div class="edu-image" style="background: #f0fdf4;">
+                    <i data-lucide="hand-metal" size="64" style="color: #22c55e;"></i>
+                </div>
+                <div class="edu-content">
+                    <span class="edu-badge">PREVENTION</span>
+                    <h3 class="edu-title">Hand Hygiene Protocol</h3>
+                    <p class="edu-desc">
+                        The 7-step guide to effective handwashing. Proven to reduce gastrointestinal diseases by up to
+                        40%.
+                    </p>
+                </div>
+            </div>
+
+            <!-- Module 3 -->
+            <div class="edu-card">
+                <div class="edu-image" style="background: #fef2f2;">
+                    <i data-lucide="shield-alert" size="64" style="color: #ef4444;"></i>
+                </div>
+                <div class="edu-content">
+                    <span class="edu-badge">DISEASE CONTROL</span>
+                    <h3 class="edu-title">Cholera Awareness</h3>
+                    <p class="edu-desc">
+                        Recognizing early symptoms and immediate rehydration protocols (ORS) for community-level
+                        intervention.
+                    </p>
+                </div>
+            </div>
+
+            <!-- Module 4 -->
+            <div class="edu-card">
+                <div class="edu-image" style="background: #fff7ed;">
+                    <i data-lucide="bug" size="64" style="color: #f97316;"></i>
+                </div>
+                <div class="edu-content">
+                    <span class="edu-badge">ENVIRONMENT</span>
+                    <h3 class="edu-title">Vector Management</h3>
+                    <p class="edu-desc">
+                        Strategies for reducing breeding grounds for insects and maintaining sanitary surroundings
+                        during monsoon.
+                    </p>
+                </div>
+            </div>
+
+            <!-- Module 5 -->
+            <div class="edu-card">
+                <div class="edu-image" style="background: #faf5ff;">
+                    <i data-lucide="apple" size="64" style="color: #a855f7;"></i>
+                </div>
+                <div class="edu-content">
+                    <span class="edu-badge">NUTRITION</span>
+                    <h3 class="edu-title">Boosting Immunity</h3>
+                    <p class="edu-desc">
+                        Local dietary recommendations to strengthen the immune system against seasonal viral outbreaks.
+                    </p>
+                </div>
+            </div>
+
+            <!-- Module 6 -->
+            <div class="edu-card">
+                <div class="edu-image" style="background: #fdf2f8;">
+                    <i data-lucide="thermometer" size="64" style="color: #ec4899;"></i>
+                </div>
+                <div class="edu-content">
+                    <span class="edu-badge">VACCINATION</span>
+                    <h3 class="edu-title">Immunization Schedule</h3>
+                    <p class="edu-desc">
+                        Keeping track of essential vaccinations for children and the elderly to prevent preventable
+                        diseases.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <footer
+        style="margin-top: 4rem; text-align: center; padding-bottom: 2rem; color: var(--text-muted); font-size: 0.875rem;">
+        &copy; 2026 H.E.A.L Initiative. All information is sourced from medical guidelines.
+    </footer>
+
+    <script>
+        lucide.createIcons();
+    </script>
+</body>
+
+</html>
